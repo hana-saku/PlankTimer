@@ -1,0 +1,18 @@
+{
+  // リポジトリ直下をそのまま配信する（ビルド工程は無い）。
+  // 既存の hanafulpop.com / kickboxing と同じ構成。
+  "name": "planktimer",
+  "compatibility_date": "2026-04-28",
+  "assets": {
+    "directory": "./"
+  },
+  // カスタムドメイン。custom_domain: true にすると
+  // wrangler がデプロイ時に DNS レコードまで作る。
+  // Cloudflare の DNS 画面で手動で CNAME を足してはいけない。
+  "routes": [
+    {
+      "pattern": "planktimer.hanafulpop.com",
+      "custom_domain": true
+    }
+  ]
+}

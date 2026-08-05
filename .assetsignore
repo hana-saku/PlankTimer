@@ -1,0 +1,12 @@
+.git
+.github
+.gitignore
+.assetsignore
+README.md
+PLANKTIMER_SPEC.md
+wrangler.jsonc
+icons/source-icon.png
+node_modules
+package.json
+package-lock.json
+.DS_Store

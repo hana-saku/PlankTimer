@@ -171,6 +171,20 @@ else speak(text);
 
 ---
 
+## デプロイ
+
+`main` へ push すると GitHub Actions が Cloudflare Workers へ自動デプロイする
+（`.github/workflows/deploy.yml`）。既存の hanafulpop.com / kickboxing と同じ仕組み。
+
+- 配信されるのはリポジトリ直下。ビルド工程は無い
+- カスタムドメインは `wrangler.jsonc` の `routes` で指定してあるので、
+  **Cloudflare の DNS 画面で手動で CNAME を追加してはいけない。**
+  wrangler がデプロイ時に DNS レコードを作る
+- 配信したくないファイルは `.assetsignore` に書く（仕様書・README・原本アイコンなど）
+- リポジトリの Secrets に `CLOUDFLARE_API_TOKEN` が必要
+
+---
+
 ## 手元で動かす
 
 ```sh
