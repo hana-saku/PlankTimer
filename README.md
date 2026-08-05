@@ -23,7 +23,7 @@
 
 ```js
 // sw.js の先頭
-var CACHE = 'plank-timer-v1';   // ← 変更のたびに v2, v3 … と上げる
+var CACHE = 'plank-timer-v2';   // ← 変更のたびに v3, v4 … と上げる
 ```
 
 上げ忘れると、利用者の端末には古い Service Worker がキャッシュを握ったまま残り、
@@ -55,7 +55,7 @@ i18n/en.js            英語の辞書
 manifest.json         PWA
 sw.js                 Service Worker
 _headers              manifest の Content-Type ほか
-icons/                アイコン（icon.svg が原本。PNG はそこから起こしたもの）
+icons/                アイコン（any と maskable の2種。原本は icons/source-icon.png）
 brand-logo.png        メニュー最下部のブランドロゴ
 ```
 
@@ -100,6 +100,28 @@ else speak(text);
 
 なお、他のアプリが音声の主導権（audio focus）を取ると Android はページを破棄する。
 これは Web アプリである限り防げない。だから `localStorage` への保存と復元が必須になる。
+
+---
+
+## アイコン
+
+| ファイル | 用途 |
+|---|---|
+| `icon-192.png` / `icon-512.png` | `purpose: "any"`。全面塗り、角丸なし |
+| `icon-192-maskable.png` / `icon-512-maskable.png` | `purpose: "maskable"`。絵柄を78%に縮めて安全圏に収めたもの |
+| `icon.svg` | 512px の PNG を埋め込んだラッパー（元絵がラスターのため） |
+| `source-icon.png` | 原本。作り直すときはこれから |
+
+作るときの決まりごと（仕様書8章）。
+
+- **背景は透過にしない。**単色で塗る。透過だと白い余白が出る端末がある
+- **角丸にしない。**角丸は OS が付ける。自前で丸めると角に白が残る
+- **`maskable` は絵柄を内側に寄せる。**OS が円などで切り抜くため、
+  外側は消える。`any` とは別ファイルにしてある
+- 原本には外周に白い余白と角丸があるので、**角丸の内側で正方形に切り出して**いる。
+  外側を推定で塗り足すと絵柄（白い人物や文字）を壊す
+- 背景に細かいノイズがあり PNG が圧縮できないため、**背景だけ均して256色に減色**している。
+  見た目は変わらず、大きさは3分の1になる
 
 ---
 
