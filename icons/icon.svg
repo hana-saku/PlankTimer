@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Plank Timer">
+  <title>Plank Timer</title>
+  <!-- 背景は透過にしない。単色で塗る。 -->
+  <rect width="512" height="512" fill="#1b1d22"/>
+  <g fill="none" stroke-linecap="round">
+    <!-- 床 -->
+    <line x1="69.1" y1="376.3" x2="442.9" y2="376.3" stroke="#ff7a59" stroke-width="26.6"/>
+    <!-- 体：肩から足へ一直線 -->
+    <line x1="176.6" y1="202.2" x2="417.3" y2="309.8" stroke="#f2ede4" stroke-width="42"/>
+    <!-- 腕 -->
+    <line x1="171.5" y1="215.0" x2="156.2" y2="353.3" stroke="#f2ede4" stroke-width="31.7"/>
+    <!-- 足先 -->
+    <line x1="415.7" y1="307.2" x2="432.6" y2="353.3" stroke="#f2ede4" stroke-width="28.2"/>
+  </g>
+  <!-- 頭 -->
+  <circle cx="115.2" cy="170.5" r="39.9" fill="#f2ede4"/>
+</svg>
