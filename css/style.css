@@ -1,0 +1,481 @@
+/* Plank Timer
+
+   床にスマホを置いて、プランクの姿勢から見上げる前提で作っている。
+   ・背景は純黒にしない。深い墨色。暗い部屋で純黒だと文字とのコントラストが強すぎて目が疲れる
+   ・文字は純白にしない。生成り
+   ・残り秒数は画面の3分の1程度
+   ・明滅・強い点滅は入れない。運動中ずっと見続けるので疲れる
+   ・色だけに頼らない。「運動中」「休憩中」の文字を必ず併記する（HTML 側） */
+
+:root {
+  --bg: #14161a;          /* 深い墨色。純黒(#000)にはしない */
+  --text: #f2ede4;        /* 生成り。純白(#fff)にはしない */
+  --text-dim: #8b8f96;
+  --accent: #8b8f96;      /* 待機中は無彩色 */
+  --time: #f2ede4;
+  --line: rgba(242, 237, 228, 0.12);
+  --panel-bg: #1c1f24;
+  --on-accent: #14161a;   /* アクセント色の上に載せる文字 */
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --fade: 420ms;          /* フェーズ切替の色の移り変わり。ゆっくり、滑らかに */
+}
+
+/* フェーズごとの配色。
+   運動 #ff7a59 と休憩 #3d8f87 は、背景に対して 6.96:1 と 4.66:1。
+   明るさの比は約 1.5:1 あるので、色の見え方が異なる方でも明暗で区別できる。
+   それでも色だけには頼らず、文字を必ず併記している。 */
+body[data-phase="work"] {
+  --bg: #1b1614;          /* 墨色をほのかに暖色へ */
+  --accent: #ff7a59;      /* 温かいオレンジ〜珊瑚色 */
+  --time: #ffd9cc;        /* 生成りを暖色寄りに。純白にはしない */
+}
+body[data-phase="rest"] {
+  --bg: #121a1a;          /* 墨色をほのかに寒色へ */
+  --accent: #3d8f87;      /* 落ち着いた青緑。運動より暗く */
+  --time: #d5ece8;
+}
+body[data-phase="finished"] {
+  --bg: #16191c;
+  --accent: #f2ede4;
+  --time: #f2ede4;
+}
+
+* { box-sizing: border-box; }
+
+/* .panel の display:flex は詳細度でブラウザ既定の [hidden]{display:none} に勝ってしまう。
+   明示しないと、閉じているパネルが画面外に残ってタブ移動で入り込める。 */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP",
+               "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--fade) var(--ease);
+}
+
+button, input, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* ============ メイン画面 ============ */
+
+.stage {
+  min-height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(10px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+}
+
+.topbar {
+  flex: none;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.app-title {
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(242, 237, 228, 0.07);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.icon-btn:active { background: rgba(242, 237, 228, 0.15); }
+
+.bars { display: grid; gap: 5px; }
+.bars i {
+  display: block;
+  width: 21px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+/* ---- 文字盤 ---- */
+
+.dial {
+  flex: 1;
+  width: 100%;
+  max-width: 560px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.4vh, 22px);
+}
+
+/* 「運動中」「休憩中」。色に頼らないための文字表示なので、小さくしすぎない */
+.phase-label {
+  font-size: clamp(1.15rem, 5vmin, 2.1rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: var(--accent);
+  transition: color var(--fade) var(--ease);
+  white-space: nowrap;
+}
+
+/* 残り秒数。画面高の約3分の1。
+   60秒未満は2桁なので 33vh まで伸ばせる。
+   1:30 形式のときは横幅が先に足りなくなるため .mmss で抑える。 */
+.time {
+  font-size: min(33vh, 70vw);
+  line-height: 1;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--time);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  transition: color var(--fade) var(--ease);
+}
+.time.mmss { font-size: min(33vh, 40vw); }
+
+/* 残り時間の帯。減っていくだけ。点滅はしない */
+.bar {
+  width: min(78vw, 420px);
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(242, 237, 228, 0.10);
+  overflow: hidden;
+}
+.bar-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: background-color var(--fade) var(--ease);
+}
+
+.setline {
+  font-size: clamp(1.1rem, 5vmin, 2rem);
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+/* ---- 操作ボタン。汗ばんだ手でも押せるよう大きめに ---- */
+
+.controls {
+  flex: none;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.ctl {
+  border: 0;
+  border-radius: 18px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  min-height: 72px;
+  cursor: pointer;
+  transition: background-color 200ms var(--ease), opacity 200ms var(--ease);
+}
+
+.ctl-main {
+  flex: 2;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.ctl-main:active { filter: brightness(0.9); }
+
+.ctl-sub {
+  flex: 1;
+  background: rgba(242, 237, 228, 0.09);
+  color: var(--text);
+}
+.ctl-sub:active { background: rgba(242, 237, 228, 0.17); }
+.ctl-sub:disabled { opacity: 0.32; cursor: default; }
+
+/* ============ 投げ銭バナー ============ */
+
+.tip-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 16px;
+  background: #22262c;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  font-size: 0.85rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px);
+  transition: opacity 300ms var(--ease), transform 300ms var(--ease), visibility 300ms;
+}
+.tip-banner.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.tip-text { flex: 1; line-height: 1.45; }
+
+.tip-go {
+  flex: none;
+  border: 0;
+  border-radius: 11px;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tip-close {
+  flex: none;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+/* ============ 設定パネル ============ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 260ms var(--ease);
+}
+.scrim.open { opacity: 1; }
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  width: min(88vw, 390px);
+  background: var(--panel-bg);
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 280ms var(--ease);
+}
+.panel.open { transform: translateX(0); }
+
+.panel-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(14px + env(safe-area-inset-top)) 16px 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.panel-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px calc(20px + env(safe-area-inset-bottom));
+  gap: 20px;
+}
+
+.field { display: grid; gap: 8px; }
+
+.field-label {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.stepper { display: flex; align-items: center; gap: 8px; }
+
+.step {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(242, 237, 228, 0.05);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.step:active { background: rgba(242, 237, 228, 0.15); }
+
+.stepper input[type="number"] {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.28);
+  text-align: center;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.stepper input[type="number"]::-webkit-outer-spin-button,
+.stepper input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.unit { flex: none; font-size: 0.85rem; color: var(--text-dim); }
+
+.hint {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.hint.dim { opacity: 0.75; }
+
+.row-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.switch { flex: none; display: inline-block; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+
+.switch .track {
+  display: block;
+  width: 54px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(242, 237, 228, 0.15);
+  position: relative;
+  transition: background-color 200ms var(--ease);
+}
+.switch .track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f2ede4;
+  transition: transform 200ms var(--ease);
+}
+.switch input:checked + .track { background: #3d8f87; }
+.switch input:checked + .track::after { transform: translateX(22px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--text); outline-offset: 2px; }
+
+.panel select {
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 0 12px;
+  font-size: 1rem;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2px 0;
+}
+
+/* ---- リンク2本（既存3アプリと同じ見た目・同じ順番） ---- */
+
+.menu-links { display: grid; gap: 4px; }
+
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 10px;
+  border-radius: 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.link-row:active { background: rgba(242, 237, 228, 0.08); }
+
+.link-icon { font-size: 1.15rem; line-height: 1; }
+
+/* ---- ブランドロゴ（パネルの一番下） ---- */
+
+.brand-mark {
+  margin-top: auto;
+  padding-top: 26px;
+  text-align: center;
+}
+.brand-mark img {
+  width: 150px;
+  max-width: 60%;
+  height: auto;
+  opacity: 0.7;
+}
+
+/* ---- キーボード操作のフォーカス ---- */
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+/* ---- 動きを減らす設定を尊重する ---- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 1ms !important; }
+}
+
+/* ---- 横向き。文字盤と操作を横に並べる ---- */
+@media (orientation: landscape) and (max-height: 560px) {
+  .stage { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .topbar { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 16px; right: 16px; width: auto; }
+  .dial { flex: 1 1 52%; }
+  .time { font-size: min(38vh, 40vw); }
+  .time.mmss { font-size: min(30vh, 30vw); }
+  .bar { width: min(42vw, 360px); }
+  .controls { flex: 1 1 30%; max-width: 280px; flex-direction: column; }
+}

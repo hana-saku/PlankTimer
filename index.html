@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Plank Timer — プランクタイマー</title>
+<meta name="description" content="プランク・腹筋・スクワットのためのインターバルタイマー。運動と休憩を繰り返します。ゴングは鳴りません。画面を消しても止まりません。インストール不要・無料。">
+<meta name="theme-color" content="#14161a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plank Timer">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-phase="idle">
+
+<!-- ------------ メイン画面 ------------ -->
+<main class="stage">
+
+  <header class="topbar">
+    <div class="app-title" data-i18n="appNameShort">Plank Timer</div>
+    <button id="menu-btn" class="icon-btn" data-i18n-aria="settings" aria-label="設定" aria-haspopup="dialog">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+  </header>
+
+  <div class="dial">
+    <!-- 色だけに頼らないよう、「運動中」「休憩中」は必ず文字でも出す。
+         phase-label と primary-btn の文言は app.js の render() が持つ。 -->
+    <div id="phase-label" class="phase-label" aria-live="polite">準備</div>
+
+    <!-- 残り時間。60秒未満は秒だけ、60秒以上は 1:30 形式（.mmss が付く） -->
+    <div id="time" class="time mmss">1:00</div>
+
+    <!-- 残り時間の帯。滑らかに減るだけで、明滅はさせない -->
+    <div class="bar" aria-hidden="true"><div id="bar-fill" class="bar-fill"></div></div>
+
+    <div id="setline" class="setline"><span id="set-now">1</span> / <span id="set-all">3</span></div>
+  </div>
+
+  <div class="controls">
+    <button id="reset-btn" class="ctl ctl-sub" data-i18n="reset">リセット</button>
+    <button id="primary-btn" class="ctl ctl-main">スタート</button>
+  </div>
+
+</main>
+
+<!-- ------------ 投げ銭バナー ------------ -->
+<div id="tip-banner" class="tip-banner" role="status">
+  <span class="tip-text" data-i18n="tipText">このアプリが役に立ったら、開発を応援してもらえると励みになります。</span>
+  <button class="tip-go" data-i18n="tipButton">応援する</button>
+  <button class="tip-close" data-i18n-aria="tipClose" aria-label="閉じる">×</button>
+</div>
+
+<!-- ------------ 設定パネル ------------ -->
+<div id="scrim" class="scrim" hidden></div>
+
+<aside id="panel" class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+
+  <div class="panel-head">
+    <h2 id="panel-title" data-i18n="settings">設定</h2>
+    <button id="panel-close" class="icon-btn" data-i18n-aria="close" aria-label="閉じる">×</button>
+  </div>
+
+  <div class="panel-body">
+
+    <div class="field">
+      <label class="field-label" for="in-work" data-i18n="workTime">運動の時間</label>
+      <div class="stepper">
+        <button class="step" data-target="in-work" data-delta="-5" aria-label="-5">−</button>
+        <input id="in-work" type="number" inputmode="numeric" min="5" max="600" step="1" value="60">
+        <span class="unit" data-i18n="unitSec">秒</span>
+        <button class="step" data-target="in-work" data-delta="5" aria-label="+5">＋</button>
+      </div>
+      <div id="work-mmss" class="hint">1:00</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="in-rest" data-i18n="restTime">休憩の時間</label>
+      <div class="stepper">
+        <button class="step" data-target="in-rest" data-delta="-5" aria-label="-5">−</button>
+        <input id="in-rest" type="number" inputmode="numeric" min="0" max="600" step="1" value="30">
+        <span class="unit" data-i18n="unitSec">秒</span>
+        <button class="step" data-target="in-rest" data-delta="5" aria-label="+5">＋</button>
+      </div>
+      <div id="rest-mmss" class="hint">0:30</div>
+      <div class="hint dim" data-i18n="restZeroNote">0秒にすると休憩なしで続けます</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="in-sets" data-i18n="setsCount">セット数</label>
+      <div class="stepper">
+        <button class="step" data-target="in-sets" data-delta="-1" aria-label="-1">−</button>
+        <input id="in-sets" type="number" inputmode="numeric" min="1" max="30" step="1" value="3">
+        <span class="unit" data-i18n="unitSets">セット</span>
+        <button class="step" data-target="in-sets" data-delta="1" aria-label="+1">＋</button>
+      </div>
+    </div>
+
+    <div class="row-toggle">
+      <span class="field-label" data-i18n="sound">合図音</span>
+      <label class="switch">
+        <input id="in-sound" type="checkbox" checked>
+        <span class="track" aria-hidden="true"></span>
+      </label>
+    </div>
+
+    <div class="row-toggle">
+      <span class="field-label" data-i18n="voice">声</span>
+      <label class="switch">
+        <input id="in-voice" type="checkbox" checked>
+        <span class="track" aria-hidden="true"></span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="in-lang" data-i18n="language">言語</label>
+      <select id="in-lang">
+        <option value="auto" data-i18n="langAuto">自動</option>
+        <option value="ja" data-i18n="langJa">日本語</option>
+        <option value="en" data-i18n="langEn">English</option>
+      </select>
+    </div>
+
+    <hr class="divider">
+
+    <div class="menu-links">
+      <a class="link-row" href="https://hanafulpop.com" target="_blank" rel="noopener">
+        <span class="link-icon" aria-hidden="true">🌐</span>
+        <span data-i18n="officialSite">公式サイト</span>
+      </a>
+      <a id="link-support" class="link-row" href="https://paypal.me/hanafulpop" target="_blank" rel="noopener">
+        <span class="link-icon" aria-hidden="true">☕</span>
+        <span data-i18n="supportDev">アプリ開発を応援する</span>
+      </a>
+    </div>
+
+    <div class="brand-mark">
+      <img src="brand-logo.png" alt="HANAFULPOP">
+    </div>
+
+  </div>
+</aside>
+
+<script src="i18n/ja.js"></script>
+<script src="i18n/en.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/session.js"></script>
+<script src="js/keepalive.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/tip.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
