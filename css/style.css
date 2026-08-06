@@ -137,7 +137,7 @@ button, input, select {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: var(--accent);
   transition: color var(--fade) var(--ease);
 }
@@ -151,7 +151,7 @@ button, input, select {
 }
 
 .phase-label {
-  font-size: clamp(1.05rem, 4.4vmin, 1.7rem);
+  font-size: clamp(1rem, 4vmin, 1.5rem);
   font-weight: 500;
   letter-spacing: 0.28em;
   text-indent: 0.28em;
@@ -163,10 +163,9 @@ button, input, select {
 .dial {
   flex: none;
   position: relative;
-  width: min(88vw, 44vh, 400px);
-  height: min(88vw, 44vh, 400px);
-  display: grid;
-  place-items: center;
+  /* 「準備」を内側へ移した分の余白をリングに回している */
+  width: min(92vw, 48vh, 420px);
+  height: min(92vw, 48vh, 420px);
 }
 
 .ring {
@@ -201,20 +200,37 @@ button, input, select {
   transition: stroke var(--fade) var(--ease);
 }
 
+/* リングの内側いっぱいに広げ、上・中央・下へ振り分ける。
+   padding は円の縁に文字がぶつからないための逃げ。 */
 .readout {
-  position: relative;
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  justify-content: space-between;
+  /* 上を厚くしているのは、リング先端のつまみが12時にあるとき
+     「運動中」に重ならないようにするため */
+  padding: 10% 12% 6%;
   pointer-events: none;
+}
+
+/* 中央。残った高さを全部使い、その中で上下中央に置く */
+.time-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
 }
 
 /* 残り秒数。リングの内側に収まる上限まで大きくする。
    60秒未満は2桁なので大きく取れる。1:30 形式のときは横幅が先に
    足りなくなるため .mmss で抑える。 */
 .time {
-  font-size: min(29vh, 58vw);
+  font-size: min(30vh, 64vw);
   line-height: 1;
   font-weight: 300;
   letter-spacing: -0.03em;
@@ -223,28 +239,11 @@ button, input, select {
   font-feature-settings: "tnum";
   transition: color var(--fade) var(--ease);
 }
-.time.mmss { font-size: min(16vh, 33vw); }
-
-/* 装飾の波形。静止画。動かさない */
-.pulse {
-  width: min(30vw, 130px);
-  height: auto;
-  margin-top: 2px;
-  overflow: visible;
-}
-.pulse polyline {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.85;
-  transition: stroke var(--fade) var(--ease);
-}
+.time.mmss { font-size: min(19vh, 40vw); }
 
 .setline {
-  margin-top: 4px;
-  font-size: clamp(1rem, 4vmin, 1.5rem);
+  flex: none;
+  font-size: clamp(0.95rem, 3.8vmin, 1.4rem);
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.1em;
@@ -583,10 +582,9 @@ button, input, select {
   }
   .topbar { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 16px; width: auto; }
   .logo { display: none; }
-  .phase-row { order: 1; flex-basis: 100%; justify-content: center; }
-  .dial { order: 2; width: min(46vw, 78vh); height: min(46vw, 78vh); }
-  .time { font-size: min(34vh, 26vw); }
-  .time.mmss { font-size: min(20vh, 16vw); }
+  .dial { order: 2; width: min(48vw, 84vh); height: min(48vw, 84vh); }
+  .time { font-size: min(38vh, 30vw); }
+  .time.mmss { font-size: min(24vh, 19vw); }
   .controls { order: 3; flex: 0 1 260px; flex-direction: column; }
   .cheer { display: none; }
 }

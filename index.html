@@ -29,14 +29,6 @@
   <!-- アイコンと同じ絵柄（背景を抜いたもの） -->
   <img class="logo" src="logo.png" alt="Plank Timer" width="719" height="677">
 
-  <!-- 色だけに頼らないよう、「運動中」「休憩中」は必ず文字でも出す -->
-  <div class="phase-row" aria-live="polite">
-    <span class="pip" aria-hidden="true"></span>
-    <!-- phase-label と primary-btn の文言は app.js の render() が持つ -->
-    <span id="phase-label" class="phase-label">準備</span>
-    <span class="pip" aria-hidden="true"></span>
-  </div>
-
   <div class="dial">
     <svg class="ring" viewBox="0 0 260 260" aria-hidden="true">
       <circle class="ring-track" cx="130" cy="130" r="118"></circle>
@@ -44,16 +36,28 @@
       <circle id="ring-knob" class="ring-knob" cx="130" cy="12" r="9"></circle>
     </svg>
 
+    <!-- 「準備」「1:00」「1 / 3」は3つともリングの内側に置く。
+         外に出すと縦の余白を食い、そのぶん数字を小さくせざるを得ないため。 -->
     <div class="readout">
-      <!-- 60秒未満は秒だけ、60秒以上は 1:30 形式（.mmss が付く） -->
-      <div id="time" class="time mmss">1:00</div>
 
-      <!-- 装飾。動かさない（明滅は入れない） -->
-      <svg class="pulse" viewBox="0 0 120 24" aria-hidden="true">
-        <polyline points="0,12 34,12 41,12 45,4 51,21 57,9 62,14 68,12 74,13 120,12"></polyline>
-      </svg>
+      <!-- リング内側の一番上（12時方向）。
+           色だけに頼らないよう「運動中」「休憩中」は必ず文字でも出す。
+           phase-label と primary-btn の文言は app.js の render() が持つ。 -->
+      <div class="phase-row" aria-live="polite">
+        <span class="pip" aria-hidden="true"></span>
+        <span id="phase-label" class="phase-label">準備</span>
+        <span class="pip" aria-hidden="true"></span>
+      </div>
 
+      <!-- リングの中央 -->
+      <div class="time-wrap">
+        <!-- 60秒未満は秒だけ、60秒以上は 1:30 形式（.mmss が付く） -->
+        <div id="time" class="time mmss">1:00</div>
+      </div>
+
+      <!-- リング内側の一番下（6時方向） -->
       <div class="setline"><span id="set-now">1</span> / <span id="set-all">3</span></div>
+
     </div>
   </div>
 
