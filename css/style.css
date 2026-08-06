@@ -3,7 +3,7 @@
    床にスマホを置いて、プランクの姿勢から見上げる前提で作っている。
    ・背景は純黒にしない。深い墨色。暗い部屋で純黒だと文字とのコントラストが強すぎて目が疲れる
    ・文字は純白にしない。生成り
-   ・残り秒数は画面の3分の1程度
+   ・残り秒数はできるだけ大きく（リングの内側に収まる上限まで）
    ・明滅・強い点滅は入れない。運動中ずっと見続けるので疲れる
    ・色だけに頼らない。「運動中」「休憩中」の文字を必ず併記する（HTML 側） */
 
@@ -11,33 +11,37 @@
   --bg: #14161a;          /* 深い墨色。純黒(#000)にはしない */
   --text: #f2ede4;        /* 生成り。純白(#fff)にはしない */
   --text-dim: #8b8f96;
-  --accent: #8b8f96;      /* 待機中は無彩色 */
+  --accent: #2fbdbd;      /* 待機中。アイコンの青緑に合わせている */
+  --accent-2: #1a9c9c;
   --time: #f2ede4;
   --line: rgba(242, 237, 228, 0.12);
   --panel-bg: #1c1f24;
-  --on-accent: #14161a;   /* アクセント色の上に載せる文字 */
+  --on-accent: #0e1114;   /* アクセント色の上に載せる文字 */
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --fade: 420ms;          /* フェーズ切替の色の移り変わり。ゆっくり、滑らかに */
 }
 
 /* フェーズごとの配色。
-   運動 #ff7a59 と休憩 #3d8f87 は、背景に対して 6.96:1 と 4.66:1。
+   運動 #ff7a59 と休憩 #3d8f87 は、背景に対して 6.98:1 と 4.61:1。
    明るさの比は約 1.5:1 あるので、色の見え方が異なる方でも明暗で区別できる。
    それでも色だけには頼らず、文字を必ず併記している。 */
 body[data-phase="work"] {
   --bg: #1b1614;          /* 墨色をほのかに暖色へ */
   --accent: #ff7a59;      /* 温かいオレンジ〜珊瑚色 */
+  --accent-2: #ef5f3b;
   --time: #ffd9cc;        /* 生成りを暖色寄りに。純白にはしない */
 }
 body[data-phase="rest"] {
   --bg: #121a1a;          /* 墨色をほのかに寒色へ */
   --accent: #3d8f87;      /* 落ち着いた青緑。運動より暗く */
+  --accent-2: #2f7a72;
   --time: #d5ece8;
 }
 body[data-phase="finished"] {
   --bg: #16191c;
   --accent: #f2ede4;
+  --accent-2: #d6d0c4;
   --time: #f2ede4;
 }
 
@@ -53,6 +57,8 @@ html, body {
   height: 100%;
   overscroll-behavior: none;
 }
+
+html { background: #14161a; }
 
 body {
   background: var(--bg);
@@ -77,6 +83,8 @@ button, input, select {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.8vh, 20px);
   padding: calc(10px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
 }
 
@@ -85,24 +93,15 @@ button, input, select {
   width: 100%;
   max-width: 560px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.app-title {
-  font-size: 0.85rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-dim);
+  justify-content: flex-end;
 }
 
 .icon-btn {
   width: 48px;
   height: 48px;
   border: 0;
-  border-radius: 14px;
-  background: rgba(242, 237, 228, 0.07);
+  border-radius: 50%;
+  background: rgba(242, 237, 228, 0.08);
   color: var(--text);
   font-size: 1.5rem;
   line-height: 1;
@@ -110,7 +109,7 @@ button, input, select {
   place-items: center;
   cursor: pointer;
 }
-.icon-btn:active { background: rgba(242, 237, 228, 0.15); }
+.icon-btn:active { background: rgba(242, 237, 228, 0.16); }
 
 .bars { display: grid; gap: 5px; }
 .bars i {
@@ -121,36 +120,101 @@ button, input, select {
   background: currentColor;
 }
 
-/* ---- 文字盤 ---- */
+/* ---- ロゴ（アイコンと同じ絵柄） ---- */
 
-.dial {
-  flex: 1;
-  width: 100%;
-  max-width: 560px;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(10px, 2.4vh, 22px);
+.logo {
+  flex: none;
+  height: auto;
+  width: auto;
+  max-height: clamp(70px, 13vh, 130px);
+  max-width: 54vw;
+  object-fit: contain;
 }
 
-/* 「運動中」「休憩中」。色に頼らないための文字表示なので、小さくしすぎない */
-.phase-label {
-  font-size: clamp(1.15rem, 5vmin, 2.1rem);
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-indent: 0.22em;
+/* ---- 「運動中」「休憩中」 ---- */
+
+.phase-row {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: var(--accent);
   transition: color var(--fade) var(--ease);
+}
+
+.pip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.75;
+}
+
+.phase-label {
+  font-size: clamp(1.05rem, 4.4vmin, 1.7rem);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
   white-space: nowrap;
 }
 
-/* 残り秒数。画面高の約3分の1。
-   60秒未満は2桁なので 33vh まで伸ばせる。
-   1:30 形式のときは横幅が先に足りなくなるため .mmss で抑える。 */
+/* ---- 文字盤 ---- */
+
+.dial {
+  flex: none;
+  position: relative;
+  width: min(88vw, 44vh, 400px);
+  height: min(88vw, 44vh, 400px);
+  display: grid;
+  place-items: center;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-track {
+  fill: none;
+  stroke: rgba(242, 237, 228, 0.08);
+  stroke-width: 6;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  /* 円周 = 2 * π * 118 ≒ 741.42。offset は JS が動かす。 */
+  stroke-dasharray: 741.42;
+  stroke-dashoffset: 0;
+  transition: stroke var(--fade) var(--ease);
+}
+
+.ring-knob {
+  fill: var(--text);
+  stroke: var(--accent);
+  stroke-width: 3;
+  transition: stroke var(--fade) var(--ease);
+}
+
+.readout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+/* 残り秒数。リングの内側に収まる上限まで大きくする。
+   60秒未満は2桁なので大きく取れる。1:30 形式のときは横幅が先に
+   足りなくなるため .mmss で抑える。 */
 .time {
-  font-size: min(33vh, 70vw);
+  font-size: min(29vh, 58vw);
   line-height: 1;
   font-weight: 300;
   letter-spacing: -0.03em;
@@ -159,32 +223,52 @@ button, input, select {
   font-feature-settings: "tnum";
   transition: color var(--fade) var(--ease);
 }
-.time.mmss { font-size: min(33vh, 40vw); }
+.time.mmss { font-size: min(16vh, 33vw); }
 
-/* 残り時間の帯。減っていくだけ。点滅はしない */
-.bar {
-  width: min(78vw, 420px);
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(242, 237, 228, 0.10);
-  overflow: hidden;
+/* 装飾の波形。静止画。動かさない */
+.pulse {
+  width: min(30vw, 130px);
+  height: auto;
+  margin-top: 2px;
+  overflow: visible;
 }
-.bar-fill {
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--accent);
-  transform-origin: left center;
-  transform: scaleX(1);
-  transition: background-color var(--fade) var(--ease);
+.pulse polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+  transition: stroke var(--fade) var(--ease);
 }
 
 .setline {
-  font-size: clamp(1.1rem, 5vmin, 2rem);
+  margin-top: 4px;
+  font-size: clamp(1rem, 4vmin, 1.5rem);
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
+
+/* ---- 応援の一言 ---- */
+
+.cheer {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(242, 237, 228, 0.06);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  font-size: clamp(0.75rem, 3vmin, 0.95rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  transition: color var(--fade) var(--ease);
+}
+.cheer-icon { font-size: 1em; line-height: 1; }
 
 /* ---- 操作ボタン。汗ばんだ手でも押せるよう大きめに ---- */
 
@@ -200,27 +284,41 @@ button, input, select {
 .ctl {
   border: 0;
   border-radius: 18px;
-  font-size: 1.2rem;
+  font-size: clamp(0.95rem, 3.6vw, 1.15rem);
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   min-height: 72px;
+  padding: 0 10px;
   cursor: pointer;
-  transition: background-color 200ms var(--ease), opacity 200ms var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;   /* 「リセット」が2行に折り返さないように */
+  transition: opacity 200ms var(--ease);
+}
+
+.ctl-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  flex: none;
 }
 
 .ctl-main {
-  flex: 2;
-  background: var(--accent);
+  flex: 1.7;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--on-accent);
 }
-.ctl-main:active { filter: brightness(0.9); }
+.ctl-main:active { filter: brightness(0.92); }
 
 .ctl-sub {
   flex: 1;
-  background: rgba(242, 237, 228, 0.09);
+  background: rgba(242, 237, 228, 0.08);
   color: var(--text);
+  border: 1px solid var(--line);
 }
-.ctl-sub:active { background: rgba(242, 237, 228, 0.17); }
+.ctl-sub:active { background: rgba(242, 237, 228, 0.16); }
 .ctl-sub:disabled { opacity: 0.32; cursor: default; }
 
 /* ============ 投げ銭バナー ============ */
@@ -469,13 +567,26 @@ button, input, select {
   * { transition-duration: 1ms !important; }
 }
 
+/* ---- 縦が短い端末。ロゴと応援の一言を省いて文字盤を優先する ---- */
+@media (max-height: 680px) {
+  .logo { max-height: 9vh; }
+  .cheer { display: none; }
+}
+
 /* ---- 横向き。文字盤と操作を横に並べる ---- */
 @media (orientation: landscape) and (max-height: 560px) {
-  .stage { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 16px; }
-  .topbar { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 16px; right: 16px; width: auto; }
-  .dial { flex: 1 1 52%; }
-  .time { font-size: min(38vh, 40vw); }
-  .time.mmss { font-size: min(30vh, 30vw); }
-  .bar { width: min(42vw, 360px); }
-  .controls { flex: 1 1 30%; max-width: 280px; flex-direction: column; }
+  .stage {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 14px;
+  }
+  .topbar { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 16px; width: auto; }
+  .logo { display: none; }
+  .phase-row { order: 1; flex-basis: 100%; justify-content: center; }
+  .dial { order: 2; width: min(46vw, 78vh); height: min(46vw, 78vh); }
+  .time { font-size: min(34vh, 26vw); }
+  .time.mmss { font-size: min(20vh, 16vw); }
+  .controls { order: 3; flex: 0 1 260px; flex-direction: column; }
+  .cheer { display: none; }
 }

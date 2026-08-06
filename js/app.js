@@ -1,5 +1,12 @@
 /* 画面と各部品の配線。 */
 (function () {
+  var RING_R = 118;
+  var RING_C = 741.42;          /* 2 * π * 118 */
+  var RING_CX = 130, RING_CY = 130;
+
+  var ICON_PLAY = 'M8 5v14l11-7z';
+  var ICON_PAUSE = 'M6 5h4v14H6zM14 5h4v14h-4z';
+
   var el = {};
   var settings = Store.DEFAULTS;
   var panelOpen = false;
@@ -13,8 +20,13 @@
     el.time = $('time');
     el.setNow = $('set-now');
     el.setAll = $('set-all');
-    el.barFill = $('bar-fill');
+    el.ringFill = $('ring-fill');
+    el.ringKnob = $('ring-knob');
+    el.cheer = $('cheer');
+    el.cheerText = $('cheer-text');
     el.primary = $('primary-btn');
+    el.primaryText = $('primary-text');
+    el.primaryIcon = $('primary-icon').querySelector('path');
     el.reset = $('reset-btn');
     el.menuBtn = $('menu-btn');
     el.panel = $('panel');
@@ -55,6 +67,11 @@
       : v.state === 'finished' ? I18N.t('finished')
       : I18N.t(v.phase);
 
+    el.cheerText.textContent =
+      v.state === 'idle' ? I18N.t('cheerIdle')
+      : v.state === 'finished' ? I18N.t('cheerDone')
+      : I18N.t(v.phase === 'work' ? 'cheerWork' : 'cheerRest');
+
     /* 残り秒は切り上げ。0.2秒残っているときに 0 と出すと止まって見える。
        60秒未満は秒だけを大きく出す。4文字だと横幅が先に足りなくなり、
        床から見上げたときに読みにくくなるため。 */
@@ -67,14 +84,23 @@
     el.setNow.textContent = v.set;
     el.setAll.textContent = v.totalSets;
 
-    /* 帯は残り時間を表す。始めは満ちていて、終わりに向かって減る。点滅はしない。 */
+    /* リングは残り時間を表す。始めは満ちていて、終わりに向かって減る。点滅はしない。 */
     var left = v.state === 'finished' ? 0 : 1 - Math.min(1, Math.max(0, v.progress));
-    el.barFill.style.transform = 'scaleX(' + left + ')';
+    el.ringFill.style.strokeDashoffset = RING_C * (1 - left);
 
-    el.primary.textContent =
-      v.state === 'running' ? I18N.t('pause')
+    /* つまみは残っている弧の先端に置く。SVG 全体を -90° 回してあるので、
+       ここでは +x 軸から測った角度で計算してよい。 */
+    var th = left * 2 * Math.PI;
+    el.ringKnob.setAttribute('cx', RING_CX + RING_R * Math.cos(th));
+    el.ringKnob.setAttribute('cy', RING_CY + RING_R * Math.sin(th));
+    el.ringKnob.style.opacity = (v.state === 'finished' || left <= 0) ? 0 : 1;
+
+    var running = v.state === 'running';
+    el.primaryText.textContent =
+      running ? I18N.t('pause')
       : v.state === 'paused' ? I18N.t('resume')
       : I18N.t('start');
+    el.primaryIcon.setAttribute('d', running ? ICON_PAUSE : ICON_PLAY);
 
     el.reset.disabled = (v.state === 'idle');
   }

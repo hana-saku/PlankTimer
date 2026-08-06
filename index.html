@@ -21,29 +21,60 @@
 <main class="stage">
 
   <header class="topbar">
-    <div class="app-title" data-i18n="appNameShort">Plank Timer</div>
     <button id="menu-btn" class="icon-btn" data-i18n-aria="settings" aria-label="設定" aria-haspopup="dialog">
       <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     </button>
   </header>
 
+  <!-- アイコンと同じ絵柄（背景を抜いたもの） -->
+  <img class="logo" src="logo.png" alt="Plank Timer" width="719" height="677">
+
+  <!-- 色だけに頼らないよう、「運動中」「休憩中」は必ず文字でも出す -->
+  <div class="phase-row" aria-live="polite">
+    <span class="pip" aria-hidden="true"></span>
+    <!-- phase-label と primary-btn の文言は app.js の render() が持つ -->
+    <span id="phase-label" class="phase-label">準備</span>
+    <span class="pip" aria-hidden="true"></span>
+  </div>
+
   <div class="dial">
-    <!-- 色だけに頼らないよう、「運動中」「休憩中」は必ず文字でも出す。
-         phase-label と primary-btn の文言は app.js の render() が持つ。 -->
-    <div id="phase-label" class="phase-label" aria-live="polite">準備</div>
+    <svg class="ring" viewBox="0 0 260 260" aria-hidden="true">
+      <circle class="ring-track" cx="130" cy="130" r="118"></circle>
+      <circle id="ring-fill" class="ring-fill" cx="130" cy="130" r="118"></circle>
+      <circle id="ring-knob" class="ring-knob" cx="130" cy="12" r="9"></circle>
+    </svg>
 
-    <!-- 残り時間。60秒未満は秒だけ、60秒以上は 1:30 形式（.mmss が付く） -->
-    <div id="time" class="time mmss">1:00</div>
+    <div class="readout">
+      <!-- 60秒未満は秒だけ、60秒以上は 1:30 形式（.mmss が付く） -->
+      <div id="time" class="time mmss">1:00</div>
 
-    <!-- 残り時間の帯。滑らかに減るだけで、明滅はさせない -->
-    <div class="bar" aria-hidden="true"><div id="bar-fill" class="bar-fill"></div></div>
+      <!-- 装飾。動かさない（明滅は入れない） -->
+      <svg class="pulse" viewBox="0 0 120 24" aria-hidden="true">
+        <polyline points="0,12 34,12 41,12 45,4 51,21 57,9 62,14 68,12 74,13 120,12"></polyline>
+      </svg>
 
-    <div id="setline" class="setline"><span id="set-now">1</span> / <span id="set-all">3</span></div>
+      <div class="setline"><span id="set-now">1</span> / <span id="set-all">3</span></div>
+    </div>
+  </div>
+
+  <div id="cheer" class="cheer">
+    <span class="cheer-icon" aria-hidden="true">🔥</span>
+    <span id="cheer-text">はじめましょう</span>
   </div>
 
   <div class="controls">
-    <button id="reset-btn" class="ctl ctl-sub" data-i18n="reset">リセット</button>
-    <button id="primary-btn" class="ctl ctl-main">スタート</button>
+    <button id="reset-btn" class="ctl ctl-sub">
+      <svg class="ctl-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"></path>
+      </svg>
+      <span data-i18n="reset">リセット</span>
+    </button>
+    <button id="primary-btn" class="ctl ctl-main">
+      <svg id="primary-icon" class="ctl-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5v14l11-7z"></path>
+      </svg>
+      <span id="primary-text">スタート</span>
+    </button>
   </div>
 
 </main>

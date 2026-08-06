@@ -23,7 +23,7 @@
 
 ```js
 // sw.js の先頭
-var CACHE = 'plank-timer-v2';   // ← 変更のたびに v3, v4 … と上げる
+var CACHE = 'plank-timer-v3';   // ← 変更のたびに v4, v5 … と上げる
 ```
 
 上げ忘れると、利用者の端末には古い Service Worker がキャッシュを握ったまま残り、
@@ -56,6 +56,7 @@ manifest.json         PWA
 sw.js                 Service Worker
 _headers              manifest の Content-Type ほか
 icons/                アイコン（any と maskable の2種。原本は icons/source-icon.png）
+logo.png              画面上部のロゴ（アイコンから背景を抜いたもの）
 brand-logo.png        メニュー最下部のブランドロゴ
 ```
 
@@ -111,6 +112,7 @@ else speak(text);
 | `icon-192-maskable.png` / `icon-512-maskable.png` | `purpose: "maskable"`。絵柄を78%に縮めて安全圏に収めたもの |
 | `icon.svg` | 512px の PNG を埋め込んだラッパー（元絵がラスターのため） |
 | `source-icon.png` | 原本。作り直すときはこれから |
+| `../logo.png` | 画面上部用。原本から背景を抜いた透過PNG（明るさと彩度で切り抜いている） |
 
 作るときの決まりごと（仕様書8章）。
 

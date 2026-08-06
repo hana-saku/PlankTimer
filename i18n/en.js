@@ -39,6 +39,12 @@
     on: 'ON',
     off: 'OFF',
 
+    /* On-screen encouragement (never spoken aloud) */
+    cheerIdle: "Let's begin",
+    cheerWork: 'Keep going!',
+    cheerRest: 'Take a breath',
+    cheerDone: 'Well done!',
+
     /* Units */
     unitMin: 'min',
     unitSec: 'sec',
