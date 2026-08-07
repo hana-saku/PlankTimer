@@ -39,12 +39,6 @@
     on: 'ON',
     off: 'OFF',
 
-    /* 応援の一言（画面に出すだけ。声には出さない） */
-    cheerIdle: 'はじめましょう',
-    cheerWork: 'その調子！',
-    cheerRest: 'ひと息ついて',
-    cheerDone: 'よくがんばりました',
-
     /* 単位 */
     unitMin: '分',
     unitSec: '秒',

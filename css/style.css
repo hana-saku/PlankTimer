@@ -84,7 +84,8 @@ button, input, select {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(8px, 1.8vh, 20px);
+  /* ロゴと文字盤の間隔を 16〜24px 確保する */
+  gap: clamp(16px, 2.7vh, 24px);
   padding: calc(10px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
 }
 
@@ -126,8 +127,9 @@ button, input, select {
   flex: none;
   height: auto;
   width: auto;
-  max-height: clamp(70px, 13vh, 130px);
-  max-width: 54vw;
+  /* ① 以前より 25〜30% 小さく */
+  max-height: clamp(50px, 9.5vh, 92px);
+  max-width: 40vw;
   object-fit: contain;
 }
 
@@ -163,9 +165,9 @@ button, input, select {
 .dial {
   flex: none;
   position: relative;
-  /* 「準備」を内側へ移した分の余白をリングに回している */
-  width: min(92vw, 48vh, 420px);
-  height: min(92vw, 48vh, 420px);
+  /* ② 画面いっぱいで窮屈だったので 8〜10% 小さくし、上下の余白を増やした */
+  width: min(84vw, 44vh, 385px);
+  height: min(84vw, 44vh, 385px);
 }
 
 .ring {
@@ -209,9 +211,10 @@ button, input, select {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  /* 上を厚くしているのは、リング先端のつまみが12時にあるとき
-     「運動中」に重ならないようにするため */
-  padding: 10% 12% 6%;
+  /* ③「準備」をリング内の上部から下げ、④「1 / 3」を下部から上げて、
+     どちらも縁から余裕を持たせる。上を厚めにしているのは、リング先端の
+     つまみが12時にあるとき「運動中」に重ならないようにするためでもある。 */
+  padding: 17% 12% 16%;
   pointer-events: none;
 }
 
@@ -230,7 +233,7 @@ button, input, select {
    60秒未満は2桁なので大きく取れる。1:30 形式のときは横幅が先に
    足りなくなるため .mmss で抑える。 */
 .time {
-  font-size: min(30vh, 64vw);
+  font-size: min(20vh, 50vw);
   line-height: 1;
   font-weight: 300;
   letter-spacing: -0.03em;
@@ -239,7 +242,7 @@ button, input, select {
   font-feature-settings: "tnum";
   transition: color var(--fade) var(--ease);
 }
-.time.mmss { font-size: min(19vh, 40vw); }
+.time.mmss { font-size: min(17vh, 36vw); }
 
 .setline {
   flex: none;
@@ -248,26 +251,6 @@ button, input, select {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.1em;
 }
-
-/* ---- 応援の一言 ---- */
-
-.cheer {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 18px;
-  border-radius: 999px;
-  background: rgba(242, 237, 228, 0.06);
-  border: 1px solid var(--line);
-  color: var(--accent);
-  font-size: clamp(0.75rem, 3vmin, 0.95rem);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-  transition: color var(--fade) var(--ease);
-}
-.cheer-icon { font-size: 1em; line-height: 1; }
 
 /* ---- 操作ボタン。汗ばんだ手でも押せるよう大きめに ---- */
 
@@ -305,14 +288,15 @@ button, input, select {
 }
 
 .ctl-main {
-  flex: 1.7;
+  /* ⑥ リセット 40% / スタート 60% */
+  flex: 3;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: var(--on-accent);
 }
 .ctl-main:active { filter: brightness(0.92); }
 
 .ctl-sub {
-  flex: 1;
+  flex: 2;
   background: rgba(242, 237, 228, 0.08);
   color: var(--text);
   border: 1px solid var(--line);
@@ -569,7 +553,6 @@ button, input, select {
 /* ---- 縦が短い端末。ロゴと応援の一言を省いて文字盤を優先する ---- */
 @media (max-height: 680px) {
   .logo { max-height: 9vh; }
-  .cheer { display: none; }
 }
 
 /* ---- 横向き。文字盤と操作を横に並べる ---- */
@@ -582,9 +565,8 @@ button, input, select {
   }
   .topbar { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 16px; width: auto; }
   .logo { display: none; }
-  .dial { order: 2; width: min(48vw, 84vh); height: min(48vw, 84vh); }
-  .time { font-size: min(38vh, 30vw); }
-  .time.mmss { font-size: min(24vh, 19vw); }
+  .dial { order: 2; width: min(44vw, 78vh); height: min(44vw, 78vh); }
+  .time { font-size: min(26vh, 21vw); }
+  .time.mmss { font-size: min(18vh, 15vw); }
   .controls { order: 3; flex: 0 1 260px; flex-direction: column; }
-  .cheer { display: none; }
 }

@@ -24,7 +24,7 @@
 
 ```js
 // sw.js の先頭
-var CACHE = 'plank-timer-v4';   // ← 変更のたびに v5, v6 … と上げる
+var CACHE = 'plank-timer-v5';   // ← 変更のたびに v6, v7 … と上げる
 ```
 
 上げ忘れると、利用者の端末には古い Service Worker がキャッシュを握ったまま残り、

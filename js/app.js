@@ -22,8 +22,6 @@
     el.setAll = $('set-all');
     el.ringFill = $('ring-fill');
     el.ringKnob = $('ring-knob');
-    el.cheer = $('cheer');
-    el.cheerText = $('cheer-text');
     el.primary = $('primary-btn');
     el.primaryText = $('primary-text');
     el.primaryIcon = $('primary-icon').querySelector('path');
@@ -66,11 +64,6 @@
       v.state === 'idle' ? I18N.t('ready')
       : v.state === 'finished' ? I18N.t('finished')
       : I18N.t(v.phase);
-
-    el.cheerText.textContent =
-      v.state === 'idle' ? I18N.t('cheerIdle')
-      : v.state === 'finished' ? I18N.t('cheerDone')
-      : I18N.t(v.phase === 'work' ? 'cheerWork' : 'cheerRest');
 
     /* 残り秒は切り上げ。0.2秒残っているときに 0 と出すと止まって見える。
        60秒未満は秒だけを大きく出す。4文字だと横幅が先に足りなくなり、
