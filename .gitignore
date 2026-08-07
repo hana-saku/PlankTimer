@@ -1,0 +1,5 @@
+# 仕様書は公開リポジトリに含めない。所有者の手元でのみ管理する。
+PLANKTIMER_SPEC.md
+
+.DS_Store
+node_modules/

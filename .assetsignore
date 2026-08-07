@@ -3,7 +3,6 @@
 .gitignore
 .assetsignore
 README.md
-PLANKTIMER_SPEC.md
 wrangler.jsonc
 icons/source-icon.png
 node_modules
