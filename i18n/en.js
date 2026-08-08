@@ -34,7 +34,7 @@
     soundNote: 'Phase cues and the 3-2-1 count',
     iosMuteNote: 'On iPhone and iPad, silent mode mutes these cues',
     voice: 'Voice',
-    voiceNote: 'Speaks “10 seconds left” only',
+    voiceNote: '“10 seconds left” and “Well done”',
     language: 'Language',
     langAuto: 'Auto',
     langJa: '日本語',
@@ -56,7 +56,8 @@
     tipButton: 'Support',
     tipClose: 'Close',
 
-    /* The only spoken cue. 3-2-1 is a sound, not a voice. */
-    speakTenLeft: '10 seconds left'
+    /* The only spoken cues. 3-2-1 is a sound, not a voice. */
+    speakTenLeft: '10 seconds left',
+    speakFinished: 'Well done'
   };
 })(window);

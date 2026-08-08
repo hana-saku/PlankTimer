@@ -112,15 +112,23 @@ var Timer = (function () {
   }
 
   /* -------- 進行 -------- */
-  /* 全セット終了では音を鳴らさない。
-     3・2・1 のあと、いつもは開始音が続くところに何も来ない。
-     その静けさ自体が「終わった」の合図になる。ゴングは鳴らさないアプリなので、
-     最後だけ大きな音を出すのは筋が通らない。 */
+  /* 全セット終了。終わったことがはっきり分かるように、短い音楽と声を出す。
+     床にうつ伏せで画面を見ていない前提なので、音だけで伝わる必要がある。
+
+     音楽が和音で伸びているあいだに声が重なるよう、声は少し遅らせる。
+     ただし画面が見えていないときは setTimeout が最大1分まで間引かれるので、
+     Speech.speak がその場合は待たずに喋る（js/speech.js）。
+
+     silent は「復元したらもう終わっていた」場合。いまさら鳴らさない。 */
   function finish(silent) {
     stopLoop();
     st.state = 'finished';
     st.remainingMs = 0;
     Store.clearSession();
+    if (!silent) {
+      Sound.finish();
+      Speech.speak(I18N.t('speakFinished'), I18N.bcp47(), 700);
+    }
     if (cb.onFinish) cb.onFinish(silent);
     if (cb.onState) cb.onState();
   }

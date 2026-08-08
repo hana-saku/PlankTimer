@@ -34,7 +34,7 @@
     soundNote: '開始の合図と、残り3・2・1',
     iosMuteNote: 'iPhone・iPad は消音（サイレント）だと合図音が鳴りません',
     voice: '声',
-    voiceNote: '「残り10秒」だけ読み上げます',
+    voiceNote: '「残り10秒」と「おつかれさまでした」',
     language: '言語',
     langAuto: '自動',
     langJa: '日本語',
@@ -56,7 +56,8 @@
     tipButton: '応援する',
     tipClose: '閉じる',
 
-    /* 読み上げ。喋らせるのはこれ1つだけ。3・2・1 は音で鳴らす。 */
-    speakTenLeft: '残り10秒'
+    /* 読み上げ。喋らせるのはこの2つだけ。3・2・1 は音で鳴らす。 */
+    speakTenLeft: '残り10秒',
+    speakFinished: 'おつかれさまでした'
   };
 })(window);
