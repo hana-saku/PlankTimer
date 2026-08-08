@@ -2,7 +2,7 @@
 
    ファイルを変えたら必ず CACHE の番号を上げること。
    上げ忘れると、修正が利用者に届かない。 */
-var CACHE = 'plank-timer-v5';
+var CACHE = 'plank-timer-v6';
 
 var ASSETS = [
   './',

@@ -127,6 +127,11 @@ var Keepalive = (function () {
   });
 
   return {
+    /* 無音ループだけを先に始める。
+       iOS の音声セッションを確定させてから AudioContext を起こすため、
+       スタートを押した直後、他の何より先に呼ぶ。 */
+    prime: playSilent,
+
     /* タイマー開始・再開時に呼ぶ（ユーザー操作の中から呼ぶこと） */
     start: function (title, artist) {
       active = true;

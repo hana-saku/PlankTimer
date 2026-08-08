@@ -31,7 +31,10 @@
     setsCount: 'セット数',
     restZeroNote: '0秒にすると休憩なしで続けます',
     sound: '合図音',
+    soundNote: '開始の合図と、残り3・2・1',
+    iosMuteNote: 'iPhone・iPad は消音（サイレント）だと合図音が鳴りません',
     voice: '声',
+    voiceNote: '「残り10秒」だけ読み上げます',
     language: '言語',
     langAuto: '自動',
     langJa: '日本語',
@@ -53,10 +56,7 @@
     tipButton: '応援する',
     tipClose: '閉じる',
 
-    /* 読み上げ（これ以外は喋らせない） */
-    speakTenLeft: '残り10秒',
-    speak3: '3',
-    speak2: '2',
-    speak1: '1'
+    /* 読み上げ。喋らせるのはこれ1つだけ。3・2・1 は音で鳴らす。 */
+    speakTenLeft: '残り10秒'
   };
 })(window);

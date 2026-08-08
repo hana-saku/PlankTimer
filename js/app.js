@@ -36,6 +36,7 @@
     el.inSound = $('in-sound');
     el.inVoice = $('in-voice');
     el.inLang = $('in-lang');
+    el.iosNote = $('ios-note');
     el.workMmss = $('work-mmss');
     el.restMmss = $('rest-mmss');
   }
@@ -190,8 +191,15 @@
 
     /* スタート／一時停止／再開 */
     el.primary.addEventListener('click', function () {
-      /* 音は必ずユーザー操作の中から起こす */
+      /* 音は必ずユーザー操作の中から起こす。順番を変えないこと。
+
+         iOS は新しい音の再生が始まるたびに音声セッションを組み直し、
+         そのとき動いている AudioContext を止めてしまう。
+         無音ループ（Keepalive）を先に鳴らしてセッションを確定させてから
+         AudioContext を起こすこと。逆にすると合図音が丸ごと鳴らなくなる。 */
+      Keepalive.prime();
       Sound.unlock();
+      Speech.warmUp();
 
       var s = Timer.getState();
       if (s === 'running') {
@@ -274,6 +282,13 @@
     bindTimer();
     wire();
     Tip.init();
+
+    /* iPadOS 13 以降は platform が 'MacIntel' を返すので、タッチの有無で見分ける。
+       消音（サイレント）中の iOS は Web Audio を鳴らさない。ページ側からは
+       消音かどうか調べる手立てが無いので、設定に一行だけ出しておく。 */
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS && el.iosNote) el.iosNote.hidden = false;
 
     /* 保存されていた状態があれば、そこから続ける */
     var saved = Store.loadSession();

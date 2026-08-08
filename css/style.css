@@ -460,12 +460,22 @@ button, input, select {
   font-variant-numeric: tabular-nums;
 }
 .hint.dim { opacity: 0.75; }
+/* 注意書き。フェーズで色が変わらないよう --accent は使わない */
+.hint.warn { color: #ff9f7a; opacity: 0.95; }
 
 .row-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+/* 見出しと、その下の一行説明。スイッチが何を切り替えるのかを書いておく */
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 
 .switch { flex: none; display: inline-block; cursor: pointer; }

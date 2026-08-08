@@ -2,6 +2,7 @@
 var Speech = (function () {
   var enabled = true;
   var voices = [];
+  var warmed = false;
 
   function loadVoices() {
     if (!('speechSynthesis' in window)) return;
@@ -38,11 +39,9 @@ var Speech = (function () {
        以降の読み上げを黙って捨てる。喋る前に必ず resume する。 */
     try { speechSynthesis.resume(); } catch (e) {}
 
-    /* 溜まった読み上げが残っていたら捨てる。
-       そのまま渡すと互いに打ち消し合って何も聞こえなくなる。 */
-    try {
-      if (speechSynthesis.pending) speechSynthesis.cancel();
-    } catch (e) {}
+    /* ここで cancel() は呼ばない。
+       iOS は cancel() の直後の speak() を黙って捨てる。
+       喋らせるのは「残り10秒」の1種類だけなので、溜まって打ち消し合うこともない。 */
 
     var u;
     try { u = new SpeechSynthesisUtterance(text); } catch (e) { return; }
@@ -76,6 +75,23 @@ var Speech = (function () {
       } else {
         speakNow(text, bcp47);
       }
+    },
+
+    /* ユーザー操作の中から1回だけ呼ぶ。
+
+       iOS は「最初の speak() がユーザー操作の中で行われた」ページでないと、
+       以降の読み上げをすべて黙って捨てる。エラーも出ない。
+       スタートを押した瞬間に、音量0の空文字を1回喋らせて解錠しておく。
+       設定の ON/OFF とは無関係に必要なので enabled は見ない。 */
+    warmUp: function () {
+      if (warmed) return;
+      if (!('speechSynthesis' in window)) return;
+      warmed = true;
+      try {
+        var u = new SpeechSynthesisUtterance(' ');
+        u.volume = 0;
+        speechSynthesis.speak(u);
+      } catch (e) {}
     },
 
     cancel: function () {

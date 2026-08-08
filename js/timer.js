@@ -74,9 +74,12 @@ var Timer = (function () {
     else Sound.restStart();
   }
 
-  function speakCue(sec) {
-    var key = sec === 10 ? 'speakTenLeft' : 'speak' + sec;
-    Speech.speak(I18N.t(key), I18N.bcp47(), 0);
+  /* 3・2・1 は音で鳴らす。数字は音では伝えられないので、
+     「残り10秒」だけは声のまま残す（言語設定に従って読み上げる）。
+     このため 3・2・1 は「合図音」、「残り10秒」は「声」の設定に属する。 */
+  function playCue(sec) {
+    if (sec === 10) Speech.speak(I18N.t('speakTenLeft'), I18N.bcp47(), 0);
+    else Sound.countdown();
   }
 
   /* 既に過ぎた読み上げを「済み」として記録する（喋らせない）。
@@ -103,18 +106,21 @@ var Timer = (function () {
         due.push(list[i]);
       }
     }
-    /* 同時に複数来たら最後の1つだけ喋る。
-       全部渡すと互いに打ち消し合って何も聞こえなくなる。 */
-    if (due.length) speakCue(Math.min.apply(null, due));
+    /* 同時に複数来たら最後の1つだけ鳴らす。
+       全部渡すと声が互いに打ち消し合って何も聞こえなくなる。 */
+    if (due.length) playCue(Math.min.apply(null, due));
   }
 
   /* -------- 進行 -------- */
+  /* 全セット終了では音を鳴らさない。
+     3・2・1 のあと、いつもは開始音が続くところに何も来ない。
+     その静けさ自体が「終わった」の合図になる。ゴングは鳴らさないアプリなので、
+     最後だけ大きな音を出すのは筋が通らない。 */
   function finish(silent) {
     stopLoop();
     st.state = 'finished';
     st.remainingMs = 0;
     Store.clearSession();
-    if (!silent) Sound.finish();
     if (cb.onFinish) cb.onFinish(silent);
     if (cb.onState) cb.onState();
   }
